@@ -40,16 +40,6 @@ resource "aws_iam_role" "bedrock_knowledge_base_role" {
     "Statement" : [
       {
         "Effect" : "Allow",
-        "Action" : [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket",
-          "kms:Decrypt"
-        ],
-        "Resource" : "*"
-      },
-      {
-        "Effect" : "Allow",
         "Principal" : {
           "Service" : "bedrock.amazonaws.com"
         },
@@ -89,6 +79,16 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
         ],
         "Resource" : "*"
       },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "kms:Decrypt"
+        ],
+        "Resource" : "*"
+      },
     ]
   })
 }
@@ -104,6 +104,8 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy_s3" {
         "Effect" : "Allow",
         "Action" : [
           "s3:ListBucket",
+          "s3:GetBucketLocation",
+          "s3:ListAllMyBuckets"
         ],
         "Resource" : var.kb_s3_data_source == null ? awscc_s3_bucket.s3_data_source[0].arn : var.kb_s3_data_source
       },
@@ -111,11 +113,48 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy_s3" {
         "Effect" : "Allow",
         "Action" : [
           "s3:GetObject",
+          "s3:GetObjectVersion"
         ],
         "Resource" : var.kb_s3_data_source == null ? "${awscc_s3_bucket.s3_data_source[0].arn}/*" : "${var.kb_s3_data_source}/*"
       }
     ]
   })
+}
+
+# Add a specific policy for the S3 data source crawler
+resource "aws_iam_policy" "s3_crawler_policy" {
+  count = var.kb_role_arn != null || local.create_kb == false || var.create_s3_data_source == false ? 0 : 1
+  name  = "S3CrawlerPolicy-${random_string.solution_prefix.result}"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:ListBucket",
+          "s3:GetBucketLocation",
+          "s3:ListAllMyBuckets"
+        ],
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+
+# Attach the crawler policy
+resource "aws_iam_role_policy_attachment" "s3_crawler_policy_attachment" {
+  count      = var.kb_role_arn != null || local.create_kb == false || var.create_s3_data_source == false ? 0 : 1
+  role       = aws_iam_role.bedrock_knowledge_base_role[0].name
+  policy_arn = aws_iam_policy.s3_crawler_policy[0].arn
 }
 
 resource "aws_iam_policy" "bedrock_kb_s3_decryption_policy" {

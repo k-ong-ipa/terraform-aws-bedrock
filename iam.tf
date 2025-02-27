@@ -79,6 +79,16 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
         ],
         "Resource" : "*"
       },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket",
+          "kms:Decrypt"
+        ],
+        "Resource" : "*"
+      },
     ]
   })
 }

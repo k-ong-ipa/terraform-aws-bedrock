@@ -111,7 +111,7 @@ resource "time_sleep" "wait_before_index_creation" {
   create_duration = "60s" # Wait for 60 seconds before creating the index
 }
 
-resource "opensearch_index" "default_oss_index" {
+resource "opensearch_index" "scout_oss_index" {
   count                          = var.create_default_kb ? 1 : 0
   name                           = "bedrock-knowledge-base-default-index-${random_string.solution_prefix.result}"
   number_of_shards               = "2"
@@ -151,6 +151,6 @@ resource "opensearch_index" "default_oss_index" {
 
 resource "time_sleep" "wait_after_index_creation" {
   count           = var.create_default_kb ? 1 : 0
-  depends_on      = [opensearch_index.default_oss_index[0]]
+  depends_on      = [opensearch_index.scout_oss_index[0]]
   create_duration = "60s" # Wait for 60 seconds before creating the index
 }

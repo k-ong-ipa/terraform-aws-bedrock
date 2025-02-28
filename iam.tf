@@ -69,7 +69,7 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
         "Action" : [
           "aoss:DashboardsAccessAll"
         ],
-        "Resource" : "awscc_opensearchserverless_collection/*"
+        "Resource" : "*"
       },
       {
         "Effect" : "Allow",

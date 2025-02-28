@@ -67,6 +67,13 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
       {
         "Effect" : "Allow",
         "Action" : [
+          "aoss:DashboardsAccessAll"
+        ],
+        "Resource" : awscc_opensearchserverless_collection.default_collection[0].arn
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
           "bedrock:InvokeModel",
         ],
         "Resource" : var.kb_embedding_model_arn

@@ -69,7 +69,7 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
         "Action" : [
           "aoss:DashboardsAccessAll"
         ],
-        "Resource" : awscc_opensearchserverless_collection.default_collection[0].arn
+        "Resource" : "awscc_opensearchserverless_collection/*"
       },
       {
         "Effect" : "Allow",
@@ -96,6 +96,17 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
         ],
         "Resource" : "*"
       },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "es:ESHttpDelete",
+          "es:ESHttpGet",
+          "es:ESHttpHead",
+          "es:ESHttpPost",
+          "es:ESHttpPut"
+        ],
+        "Resource" : "*"
+      }
     ]
   })
 }

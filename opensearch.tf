@@ -97,7 +97,8 @@ resource "aws_opensearchserverless_access_policy" "data_policy" {
       ],
       Principal = [
         var.kb_role_arn != null ? var.kb_role_arn : aws_iam_role.bedrock_knowledge_base_role[0].arn,
-        data.aws_caller_identity.current.arn
+        # data.aws_caller_identity.current.arn
+        replace(data.aws_caller_identity.current.arn, "/assumed-role/(.*?)\\/.*$/", "role/$1")
       ]
     }
   ])
@@ -108,7 +109,7 @@ resource "aws_opensearchserverless_access_policy" "data_policy" {
 resource "time_sleep" "wait_before_index_creation" {
   count           = var.create_default_kb ? 1 : 0
   depends_on      = [aws_opensearchserverless_access_policy.data_policy[0]]
-  create_duration = "60s" # Wait for 60 seconds before creating the index
+  create_duration = "120s" # Wait for 60 seconds before creating the index
 }
 
 resource "opensearch_index" "scout_ref_oss_index" {
@@ -146,7 +147,23 @@ resource "opensearch_index" "scout_ref_oss_index" {
     }
   EOF
   force_destroy                  = true
-  depends_on                     = [time_sleep.wait_before_index_creation, aws_opensearchserverless_access_policy.data_policy[0]]
+
+  # Add lifecycle configuration to handle failures more gracefully
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to these attributes
+      number_of_shards,
+      number_of_replicas
+    ]
+    # Uncomment if you need to recreate on failure
+    # create_before_destroy = true
+  }
+
+  depends_on = [
+    time_sleep.wait_before_index_creation,
+    aws_opensearchserverless_access_policy.data_policy[0],
+    awscc_opensearchserverless_collection.default_collection[0]
+  ]
 }
 
 resource "time_sleep" "wait_after_index_creation" {

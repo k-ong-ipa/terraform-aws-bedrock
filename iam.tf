@@ -106,6 +106,38 @@ resource "aws_iam_policy" "bedrock_knowledge_base_policy" {
           "es:ESHttpPut"
         ],
         "Resource" : "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "aoss:CreateCollection",
+          "aoss:DeleteCollection",
+          "aoss:UpdateCollection",
+          "aoss:GetCollection",
+          "aoss:ListCollections",
+          "aoss:BatchGetCollection",
+          "aoss:CreateAccessPolicy",
+          "aoss:UpdateAccessPolicy",
+          "aoss:DeleteAccessPolicy",
+          "aoss:GetAccessPolicy",
+          "aoss:ListAccessPolicies",
+          "aoss:CreateSecurityPolicy",
+          "aoss:UpdateSecurityPolicy",
+          "aoss:DeleteSecurityPolicy",
+          "aoss:GetSecurityPolicy",
+          "aoss:ListSecurityPolicies",
+          "aoss:CreateIndex",
+          "aoss:DeleteIndex",
+          "aoss:UpdateIndex",
+          "aoss:DescribeIndex",
+          "aoss:ReadDocument",
+          "aoss:WriteDocument",
+          "aoss:DescribeCollectionItems",
+          "aoss:DeleteCollectionItems",
+          "aoss:CreateCollectionItems",
+          "aoss:UpdateCollectionItems"
+        ],
+        Resource = ["*"]
       }
     ]
   })
